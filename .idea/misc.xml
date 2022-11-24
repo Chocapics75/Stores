@@ -3,6 +3,10 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/rober/AndroidStudioProjects/Stores/app/src/main/res/layout/activity_main.xml" value="0.36666666666666664" />
+        <entry key="..\:/Users/rober/AndroidStudioProjects/Stores/app/src/main/res/layout/fragment_edit_store.xml" value="0.36666666666666664" />
+        <entry key="..\:/Users/rober/AndroidStudioProjects/Stores/app/src/main/res/layout/item_store.xml" value="0.3619791666666667" />
+        <entry key="..\:/Users/rober/AndroidStudioProjects/Stores/app/src/main/res/menu/menu_save.xml" value="0.36666666666666664" />
         <entry key="..\:/Users/rober/StudioProjects/Stores/app/src/main/res/drawable/states_checkbox_favorite.xml" value="0.2555" />
         <entry key="..\:/Users/rober/StudioProjects/Stores/app/src/main/res/layout/activity_main.xml" value="0.264" />
         <entry key="..\:/Users/rober/StudioProjects/Stores/app/src/main/res/layout/item_store.xml" value="0.264" />

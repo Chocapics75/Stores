@@ -7,7 +7,7 @@ import com.example.stores.databinding.ActivityMainBinding
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
 
-class MainActivity : AppCompatActivity(), OnClickListener {
+class MainActivity : AppCompatActivity(), OnClickListener, MainAux {
     private lateinit var mBinding: ActivityMainBinding
     private lateinit var mAdapter: StoreAdapter
     private lateinit var mGridLayout: GridLayoutManager
@@ -17,16 +17,31 @@ class MainActivity : AppCompatActivity(), OnClickListener {
         mBinding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(mBinding.root)
 
-        mBinding.btnSave.setOnClickListener{
+        /*mBinding.btnSave.setOnClickListener{
             val store = StoreEntity(nombre = mBinding.etName.text.toString().trim())
             Thread{
                 StoreApplication.database.storeDao().addStore(store)
             }.start()
 
             mAdapter.add(store)
-        }
+        } */
+
+        mBinding.fab.setOnClickListener { launchEditFragment() }
 
         setupRecyclerView()
+    }
+
+    private fun launchEditFragment() {
+        val fragment = EditStoreFragment()
+
+        val fragmentManager = supportFragmentManager
+        val fragmentTransaction = fragmentManager.beginTransaction()
+
+        fragmentTransaction.add(R.id.containerMain, fragment)
+        fragmentTransaction.addToBackStack(null)
+        fragmentTransaction.commit()
+
+        hideFab()
     }
 
     private fun setupRecyclerView() {
@@ -66,5 +81,18 @@ class MainActivity : AppCompatActivity(), OnClickListener {
                 mAdapter.update(storeEntity)
             }
         }
+    }
+
+    override fun onDeleteStore(storeEntity: StoreEntity) {
+        doAsync {
+            StoreApplication.database.storeDao().deleteStore(storeEntity)
+            uiThread {
+                mAdapter.delete(storeEntity)
+            }
+        }
+    }
+
+    override fun hideFab(isVisible: Boolean) {
+        if(!isVisible) mBinding.fab.hide() else mBinding.fab.show()
     }
 }
