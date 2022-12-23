@@ -2,9 +2,9 @@
   <library name="Gradle: org.jetbrains.anko:anko-commons:0.10.8@aar">
     <CLASSES>
       <root url="file://$USER_HOME$/.gradle/caches/transforms-3/82118d48a802116d5afd36317068b40f/transformed/anko-commons-0.10.8/res" />
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/2eb016c9d14d53f2edd6606a8d4a201f/transformed/anko-commons-0.10.8/jars/classes.jar!/" />
       <root url="file://$USER_HOME$/.gradle/caches/transforms-3/2eb016c9d14d53f2edd6606a8d4a201f/transformed/anko-commons-0.10.8/res" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/2eb016c9d14d53f2edd6606a8d4a201f/transformed/anko-commons-0.10.8/AndroidManifest.xml" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/ba481f497c23edb553d6caa327ab3272/transformed/anko-commons-0.10.8/AndroidManifest.xml" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/ba481f497c23edb553d6caa327ab3272/transformed/anko-commons-0.10.8/jars/classes.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>

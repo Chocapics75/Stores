@@ -1,8 +1,14 @@
 package com.example.stores
 
+import android.content.Context
 import android.os.Bundle
 import android.view.*
+import android.view.inputmethod.InputMethodManager
+import android.widget.Toast
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.stores.databinding.FragmentEditStoreBinding
 import com.google.android.material.snackbar.Snackbar
 import org.jetbrains.anko.doAsync
@@ -26,11 +32,26 @@ class EditStoreFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val id = arguments?.getLong(getString(R.string.arg_id), 0)
+        if(id != null && id != 0L){
+            Toast.makeText(activity, id.toString(), Toast.LENGTH_SHORT).show()
+        }else{
+            Toast.makeText(activity, id.toString(), Toast.LENGTH_SHORT).show()
+        }
+
         mActivity = activity as? MainActivity
         mActivity?.supportActionBar?.setDisplayHomeAsUpEnabled(true)
         mActivity?.supportActionBar?.title = getString(R.string.edit_store_title_add)
 
         setHasOptionsMenu(true)
+
+        mBinding.etPhotoURL.addTextChangedListener {
+            Glide.with(this)
+                .load(mBinding.etPhotoURL.text.toString())
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .centerCrop()
+                .into(mBinding.imgPhoto)
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -48,22 +69,43 @@ class EditStoreFragment : Fragment() {
                 val store = StoreEntity(
                     nombre = mBinding.etName.text.toString().trim(),
                     phone = mBinding.etPhone.text.toString().trim(),
-                    website = mBinding.etWebSite.text.toString().trim()
+                    website = mBinding.etWebSite.text.toString().trim(),
+                    photoURL = mBinding.etPhotoURL.text.toString().trim()
                 )
                 doAsync {
-                    StoreApplication.database.storeDao().addStore(store)
+                    store.id = StoreApplication.database.storeDao().addStore(store)
                     uiThread {
-                        Snackbar.make(
+                        mActivity?.addStore(store)
+                        ocultarTeclado()
+                        /**
+                         * Con Snackbar se puede solapar encima de botones o de información debajo de pantalla
+                         */
+                        /*Snackbar.make(
                             mBinding.root,
                             getString(R.string.edit_store_mensaje_correcto),
                             Snackbar.LENGTH_SHORT
-                        ).show()
+                        ).show()*/
+                        /**
+                         * Con Toast no necesita vista y no solapa nada en la parte inferior
+                         */
+                        Toast.makeText(mActivity, R.string.edit_store_mensaje_correcto, Toast.LENGTH_SHORT).show()
+                        mActivity?.onBackPressed()
                     }
                 }
                 true
             }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    private fun ocultarTeclado(){
+        val inm = mActivity?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        inm.hideSoftInputFromWindow(requireView().windowToken, 0)
+    }
+
+    override fun onDestroyView() {
+        ocultarTeclado()
+        super.onDestroyView()
     }
 
     override fun onDestroy() {

@@ -5,6 +5,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.stores.databinding.ItemStoreBinding
 
 class StoreAdapter(private var stores: MutableList<StoreEntity>, private var listener: OnClickListener) : RecyclerView.Adapter<StoreAdapter.ViewHolder>(){
@@ -26,14 +28,22 @@ class StoreAdapter(private var stores: MutableList<StoreEntity>, private var lis
             setListener(store)
             binding.textViewName.text = store.nombre
             binding.checkboxFavorite.isChecked = store.isFavorite
+
+            Glide.with(nContext)
+                .load(store.photoURL)
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .centerCrop()
+                .into(binding.imagePhoto)
         }
     }
 
     override fun getItemCount(): Int = stores.size
 
     fun add(storeEntity: StoreEntity) {
-        stores.add(storeEntity)
-        notifyDataSetChanged()
+        if(!stores.contains(storeEntity)){
+            stores.add(storeEntity)
+            notifyItemInserted(stores.size - 1)
+        }
     }
 
     fun setStores(stores: MutableList<StoreEntity>) {
@@ -62,7 +72,7 @@ class StoreAdapter(private var stores: MutableList<StoreEntity>, private var lis
 
         fun setListener(storeEntity: StoreEntity){
             with(binding.root){
-                setOnClickListener{listener.onClick(storeEntity)}
+                setOnClickListener{listener.onClick(storeEntity.id)}
                 setOnClickListener{ listener.onDeleteStore(storeEntity)
                     true }
             }
