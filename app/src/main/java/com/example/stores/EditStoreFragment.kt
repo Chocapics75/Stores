@@ -2,6 +2,7 @@ package com.example.stores
 
 import android.content.Context
 import android.os.Bundle
+import android.text.Editable
 import android.view.*
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
@@ -13,12 +14,16 @@ import com.example.stores.databinding.FragmentEditStoreBinding
 import com.google.android.material.snackbar.Snackbar
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
+import java.util.concurrent.LinkedBlockingDeque
+import java.util.concurrent.LinkedBlockingQueue
 
 
 class EditStoreFragment : Fragment() {
 
     private lateinit var mBinding: FragmentEditStoreBinding
     private var mActivity: MainActivity? = null
+    private var mIsEditMode: Boolean = false
+    private var mStoreEntity: StoreEntity? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -34,9 +39,11 @@ class EditStoreFragment : Fragment() {
 
         val id = arguments?.getLong(getString(R.string.arg_id), 0)
         if(id != null && id != 0L){
-            Toast.makeText(activity, id.toString(), Toast.LENGTH_SHORT).show()
+            mIsEditMode = true
+            getStore(id)
         }else{
-            Toast.makeText(activity, id.toString(), Toast.LENGTH_SHORT).show()
+            mIsEditMode = false
+            mStoreEntity = StoreEntity(nombre = "", phone = "", photoURL = "")
         }
 
         mActivity = activity as? MainActivity
@@ -54,6 +61,33 @@ class EditStoreFragment : Fragment() {
         }
     }
 
+    private fun getStore(id: Long) {
+        val queue = LinkedBlockingQueue<StoreEntity?>()
+        Thread{
+            mStoreEntity = StoreApplication.database.storeDao().getStoreById(id)
+            queue.add(mStoreEntity)
+        }.start()
+        queue.take()?.let {
+            setUiStore(it)
+        }
+    }
+
+    private fun setUiStore(it: StoreEntity) {
+        with(mBinding){
+            /*etName.setText(it.nombre)
+            etPhone.setText(it.phone)
+            etWebSite.setText(it.website)
+            etPhotoURL.setText(it.photoURL)*/
+            etName.text = it.nombre.editable()
+            etPhone.text = it.phone.editable()
+            etWebSite.text = it.website.editable()
+            etPhotoURL.text = it.photoURL.editable()
+            Glide.with(requireActivity()).load(it.photoURL).diskCacheStrategy(DiskCacheStrategy.ALL).centerCrop().into(imgPhoto)
+        }
+    }
+
+    private fun String.editable(): Editable = Editable.Factory.getInstance().newEditable(this)
+
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.menu_save, menu)
         super.onCreateOptionsMenu(menu, inflater)
@@ -66,30 +100,41 @@ class EditStoreFragment : Fragment() {
                 true
             }
             R.id.action_save -> {
-                val store = StoreEntity(
+                if(mStoreEntity != null){
+                    /*val store = StoreEntity(
                     nombre = mBinding.etName.text.toString().trim(),
                     phone = mBinding.etPhone.text.toString().trim(),
                     website = mBinding.etWebSite.text.toString().trim(),
                     photoURL = mBinding.etPhotoURL.text.toString().trim()
-                )
-                doAsync {
-                    store.id = StoreApplication.database.storeDao().addStore(store)
-                    uiThread {
-                        mActivity?.addStore(store)
-                        ocultarTeclado()
-                        /**
-                         * Con Snackbar se puede solapar encima de botones o de información debajo de pantalla
-                         */
-                        /*Snackbar.make(
-                            mBinding.root,
-                            getString(R.string.edit_store_mensaje_correcto),
-                            Snackbar.LENGTH_SHORT
-                        ).show()*/
-                        /**
-                         * Con Toast no necesita vista y no solapa nada en la parte inferior
-                         */
-                        Toast.makeText(mActivity, R.string.edit_store_mensaje_correcto, Toast.LENGTH_SHORT).show()
-                        mActivity?.onBackPressed()
+                )*/
+                    with(mStoreEntity!!){
+                        nombre = mBinding.etName.text.toString().trim()
+                        phone = mBinding.etPhone.text.toString().trim()
+                        website = mBinding.etWebSite.text.toString().trim()
+                        photoURL = mBinding.etPhotoURL.text.toString().trim()
+                    }
+                    doAsync {
+                        if(mIsEditMode)
+                            StoreApplication.database.storeDao().updateStore(mStoreEntity!!)
+                        else
+                            mStoreEntity!!.id = StoreApplication.database.storeDao().addStore(mStoreEntity!!)
+                        uiThread {
+                            mActivity?.addStore(mStoreEntity!!)
+                            ocultarTeclado()
+                            /**
+                             * Con Snackbar se puede solapar encima de botones o de información debajo de pantalla
+                             */
+                            /*Snackbar.make(
+                                mBinding.root,
+                                getString(R.string.edit_store_mensaje_correcto),
+                                Snackbar.LENGTH_SHORT
+                            ).show()*/
+                            /**
+                             * Con Toast no necesita vista y no solapa nada en la parte inferior
+                             */
+                            Toast.makeText(mActivity, R.string.edit_store_mensaje_correcto, Toast.LENGTH_SHORT).show()
+                            mActivity?.onBackPressed()
+                        }
                     }
                 }
                 true
